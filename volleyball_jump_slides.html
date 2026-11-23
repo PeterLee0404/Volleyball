@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>排球垂直跳科學：16:9 演講專用投影片</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --slide-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --accent-teal: #0d9488;
+      --accent-amber: #d97706;
+      --accent-sky: #0284c7;
+      --accent-indigo: #4f46e5;
+    }
+    body {
+      background-color: var(--bg-dark);
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+    /* 16:9 Fixed Ratio Stage Container */
+    .slide-viewport {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .slide-canvas {
+      width: 100%;
+      max-width: 1140px;
+      aspect-ratio: 16 / 9;
+      background-color: var(--slide-bg);
+      color: var(--text-main);
+      border-radius: 1.25rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2.5rem 3.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Drawer animation */
+    .drawer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, opacity 0.2s ease-in;
+      opacity: 0;
+    }
+    .drawer.open {
+      max-height: 260px;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="w-screen h-screen">
+
+  <div class="slide-viewport">
+    <!-- 16:9 Canvas -->
+    <div class="slide-canvas" id="slide-stage">
+
+      <!-- Top Header in Slide -->
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2">
+          <span class="text-sm">🏐</span>
+          <span id="slide-tag" class="text-xs font-black uppercase tracking-widest text-teal-700">排球跳躍科學</span>
+        </div>
+        <div class="flex items-center space-x-3">
+          <span id="slide-counter" class="text-xs font-mono font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">01 / 08</span>
+        </div>
+      </div>
+
+      <!-- Center Slide Body (Injected by JS with 2-Column Balanced Layout) -->
+      <div id="slide-body" class="flex-1 my-auto py-2"></div>
+
+      <!-- Bottom Footer in Slide -->
+      <div class="pt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
+        <div class="flex items-center space-x-4">
+          <span>鍵盤快捷鍵：<kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-slate-600">→</kbd> / <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-slate-600">Space</kbd> 換頁</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-slate-600">1 ~ 8</kbd> 快速跳頁</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-slate-600">D</kbd> 教授數據</span>
+        </div>
+        <div>
+          <button onclick="toggleProfessorDrawer()" class="px-3 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold text-xs transition flex items-center space-x-1 border border-teal-200">
+            <span>🎓 展開教授審查級數據</span>
+            <span id="drawer-btn-icon" class="font-mono text-[10px]">▼</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const SLIDES_CONTENT = [
+      {
+        id: 1,
+        tag: "破題與現實挑戰",
+        title: "排球垂直跳不只是跳得高：一場起跳 400 次的極限挑戰",
+        punchline: "排球比的不是單次跳高的極限，而是 400 次起跳下的抗衰竭續航力。",
+        metaphor_title: "📱 手機拍一張美照 vs 連續錄影 4 小時",
+        metaphor_desc: "一般人測跳高就像用手機拍一張最高畫質的照片，拍完就收工；但排球選手是在打一場激烈大賽，連續跳 400 次就像連續錄 4K 影片 4 小時——比的不是能不能錄第一秒，而是手機會不會過熱當機、電池能不能撐到最後！",
+        extra_knowledge_title: "排球專項傷害：跳躍者的膝蓋（Jumper's Knee）",
+        extra_knowledge_body: "排球主攻手在助跑扣球著地時，常因避網或身體傾斜形成「單腳非對稱著地」，單腳瞬間承受高達 4 到 6 倍體重的衝擊力！這就是為什麼排球選手髕骨肌腱發炎（Jumper's Knee）盛行率高達 40% 的主因——跳躍訓練必須同時兼顧著地緩衝機制。",
+        academic: {
+          paper: "Tillman et al. (2004) J. Sports Sci. Med. & Lima et al. (2019)",
+          points: [
+            "排球專項負擔：高水準比賽每局跳躍著地 20~30 次，5 局大賽累積 200~400 次高強度彈跳。",
+            "進攻轉換：約 40% 的拉鋸回合需在防守後立即銜接助跑扣球跳躍（Rebelo et al., 2022）。",
+            "啟示：單純追求深蹲 1RM 重量，無法解決第 5 局跳躍疲勞與摸高下滑問題。"
+          ]
+        }
+      },
+      {
+        id: 2,
+        tag: "迷思破解一 · 肌肉形態學",
+        title: "大腿前側練得再粗，為什麼對跳高毫無幫助？",
+        punchline: "大腿中央的股直肌在起跳時長度被抵消；真正的主力發動機是大腿外側（VL）。",
+        metaphor_title: "🏃 在向下運行的手扶梯上原地踏步",
+        metaphor_desc: "很多人在腿伸展機上猛踢大腿前側（股直肌 RF）。但它同時連著膝蓋跟屁股：起跳時膝蓋打直在拉長它，屁股同時也在往後蹬縮短它！一拉一縮正好抵消，就像你在向下運行的手扶梯上往上走，累得半死卻原地踏步！它根本沒輸出往上推的力氣！真正帶你起飛的是大腿外側的股外側肌（VL）。",
+        extra_knowledge_title: "前蹲舉（Front Squats）為什麼比傳統深蹲更好？",
+        extra_knowledge_body: "肌電圖（EMG）研究證實，前蹲舉因為要求軀幹極度挺直，膝關節向前推的力矩顯著放大，對「股外側肌（VL）」的刺激度比傳統背蹲舉高出 15% 以上；同時大幅減少腰椎剪力，是最適合排球跳躍者的深蹲動作！",
+        academic: {
+          paper: "Jiang, Chen & Xu (2024), Frontiers in Physiology (doi: 10.3389/fphys.2024.1427748)",
+          points: [
+            "超音波回歸模型：股外側肌橫截面積（VL-ACSA）對各類跳高皆達顯著預測（攻擊跳 R²=0.32、CMJ R²=0.37、深蹲跳 R²=0.52，均 p < 0.01）。",
+            "股直肌無效功：股直肌橫截面積與厚度對所有跳躍高度之 p > 0.05，決定係數 R² 趨近於 0。",
+            "處方：放棄坐姿腿伸展機，改做前蹲舉與負重高踏階（Step-ups）以精準刺激 VL。"
+          ]
+        }
+      },
+      {
+        id: 3,
+        tag: "扣球專項 · 肌束長度",
+        title: "扣球手的秘密武器：小腿肚外側的超長橡皮筋",
+        punchline: "肌束長度決定最高收縮速度，助跑煞車起跳需要超長肌節瞬間彈射。",
+        metaphor_title: "🏹 手指上的小橡皮圈 vs 彈弓上的超長大橡皮筋",
+        metaphor_desc: "為什麼有人原地跳普通，助跑扣球卻能飛上天？小腿肌束短的人就像小橡皮圈，只能慢慢拉開彈一下；扣球高手的小腿肚外側藏著一條「超長大橡皮筋」（肌束長度長）。助跑踏出煞車步只有短短 0.1 秒，長橡皮筋能在這眨眼瞬間以極速「咻」的一聲彈射出去，把腳踝狠狠甩向地面！",
+        extra_knowledge_title: "頂尖短跑選手與排球員的小腿共同特徵",
+        extra_knowledge_body: "超音波解剖研究發現，世界級 100m 短跑選手與排球菁英小腿肚位置都很高——肌肉本體緊湊並具備長肌束，下方連接著極為細長的阿基里斯腱。這讓小腿質量靠近膝關節，大幅減少足踝擺動慣性，提高擺腿頻率與起跳踝彈射速度！",
+        academic: {
+          paper: "Jiang, Chen & Xu (2024) & Baroni et al. (2013) Muscle Nerve",
+          points: [
+            "小腿外側肌束長度（LG-FL）：單獨預測攻擊跳摸高（R² = 0.18, p = 0.009），但對原地跳無預測力。",
+            "73% 終極預測模型：結合 VL-ACSA + LG-FL + 訓練年資，預測排球攻擊摸高達到 F = 13.86, R² = 0.73 (p < 0.001)。",
+            "訓練處方：階梯邊緣單腳大重量離心下放（4 秒慢速下沉）可使肌束長度增長 17%–19%。"
+          ]
+        }
+      },
+      {
+        id: 4,
+        tag: "迷思破解二 · 伸展收縮循環",
+        title: "起跳一定要像鋼鐵彈簧？打破下肢剛性迷思",
+        punchline: "短-SSC 靠剛性回彈，長-SSC 扣球跳靠深屈膝緩衝換取極致推蹬衝量。",
+        metaphor_title: "🦘 硬邦邦的水泥地 vs 踩進彈簧床深沉下壓",
+        metaphor_desc: "教練常喊：「腳不要軟！一碰地就要像踩到熱鍋一樣彈起來！」如果是網前快攔網（短-SSC），確實要像熱鍋彈珠一碰就彈；但助跑扣球或 40cm 深跳（長-SSC）跳得最高的選手，腳反而『更軟、蹲得更深』！如果腳像鐵棍一樣硬碰硬，大腿臀部肌肉根本來不及發力；必須像貓咪撲獵物一樣順暢下沉（膝彎約 100°），把彈簧床壓到最底，才能換取最大的向上衝量！",
+        extra_knowledge_title: "仿生力學：貓科動物的起跳智慧",
+        extra_knowledge_body: "自然界中，貓撲抓獵物起跳前，後肢會深深下壓蹲伏，藉由大幅度關節屈曲讓肌肉伸展更長、做功時間更足；只有在高速小碎步追逐時，關節才鎖定為高剛性。長-SSC 深屈膝不是「腳軟無力」，而是智慧型蓄能！",
+        academic: {
+          paper: "Deng et al. (2025), Front. Bioeng. Biotechnol. (doi: 10.3389/fbioe.2025.1653751)",
+          points: [
+            "深跳高度核心因子：推蹬期峰值速度與跳高呈極高度正相關 (r = 0.911, p < 0.001)。",
+            "下肢剛性逆向表現：高跳組垂直剛性顯著低於低跳組 (58.44 vs 84.66 N·m⁻¹·kg⁻¹, p = 0.004, g = -1.521)。",
+            "衝量公式：離地速度 v = √(2gh) 取決於向心衝量 ∫(Fz - mg)dt。低剛性、深膝角拉長了推蹬距離與做功時間。"
+          ]
+        }
+      },
+      {
+        id: 5,
+        tag: "迷思破解三 · 動力鏈傳導",
+        title: "狂練棒式與捲腹，真的能幫你多摸一顆球嗎？",
+        punchline: "核心是防漏力的傳動軸與著地防傷護甲，不是提供垂直動力的發動機。",
+        metaphor_title: "🧋 喝珍奶的紙吸管泡爛了",
+        metaphor_desc: "很多人跳不高就狂練捲腹，以為核心練好就能多摸一顆球。產生力量的發動機是你的「臀腿」，核心只是中間的「吸管」：吸管泡爛了（核心太軟），底下的珍珠（下肢力量）吸到一半就漏氣扁掉，力氣傳不上去，落地還容易膝蓋內夾受傷；但是：把紙吸管換成不鏽鋼吸管，它也不會自己把珍珠噴進你嘴裡！吸力（雙腿推蹬）才是力量源頭。",
+        extra_knowledge_title: "核心抗旋轉能力：前十字韌帶（ACL）的救命防線",
+        extra_knowledge_body: "排球員在空中扣球時，上半身產生劇烈的單側旋轉力矩。強大的核心肌群（特別是背伸肌與腹斜肌）能於著地瞬間鎖定骨盆中立位，防止下肢出現危險的「動態膝外翻（Dynamic Valgus）」，這是預防 ACL 韌帶斷裂最有效的神經肌肉護甲！",
+        academic: {
+          paper: "Bustos Carvajal & Arias Coronel (2025), Systematic Review, Front. Sports Act. Living",
+          points: [
+            "跳高無直接遷移：純核心訓練對垂直跳（CMJ）淨高度提升為不顯著 (p = 0.63 - 0.82)。",
+            "敏捷無直接遷移：T-Test 與伊利諾敏捷測驗無顯著改善 (p = 0.07 - 0.83)。",
+            "真實價值：軀幹伸肌力矩提升 +6.8% (p=0.02)，10–20m 衝刺快 3.6%，著地時顯著抑制膝內翻 (Valgus)，大幅降低前十字韌帶（ACL）受傷風險。"
+          ]
+        }
+      },
+      {
+        id: 6,
+        tag: "實戰耐力 · 週期化課表",
+        title: "把疲勞曲線壓平：8 週增強式訓練改寫第 5 局",
+        punchline: "透過 3:1 階梯式觸地量進階，提升神經放電頻率與重複跳躍穩定度。",
+        metaphor_title: "🔋 電池健康度 70% vs 換全新大容量耐操電池",
+        metaphor_desc: "開局大家都是 100% 滿電，隨便跳都高；打到第四、五局，沒練過的人電量掉到 20%，手機開始發燙、畫面降頻卡頓（起跳高度雪崩下滑、扣球狂掛網）；8 週科學化增強式訓練，就是幫你的神經與肌肉換上一顆 5000mAh 的耐操大電池，打到最後一分，你的離地速度依然能開到全滿格！",
+        extra_knowledge_title: "週期化 3:1 減量週（Deload Week）的超補償奇蹟",
+        extra_knowledge_body: "大腦運動皮質與高閾值運動單元在中樞疲勞累積時會啟動保護性抑制。在第 4 週與第 8 週主動將跳躍觸地量砍半（減量 40%），能讓神經系統與阿基里斯腱完成「超補償（Supercompensation）」，往往在減量後的第一場比賽迎來彈跳高度暴增！",
+        academic: {
+          paper: "Mamajonov et al. (2026), Physiologia (doi: 10.3390/physiologia6020034)",
+          points: [
+            "起跳高度成長：實驗組 CMJ 淨提升 +3.88 cm (p < 0.001)，顯著優於常規排球訓練之控制組 (+2.04 cm)。",
+            "連續跳躍耐力指數：由 1.14 飆升至 1.30 (p < 0.001)。",
+            "比賽專項耐力：扣球跳躍耐力測驗失誤次數顯著下降 -1.80 次 (p = 0.011)。",
+            "3:1 漸進模型：第 1–2 週單次 60–80 觸地 → 第 7–8 週 100–120 觸地，每 3 週增量後接 1 週減量。"
+          ]
+        }
+      },
+      {
+        id: 7,
+        tag: "生理調控 · 複雜適應系統 (CAS)",
+        title: "生化開關：補劑是調節器，別踩抗氧化地雷",
+        punchline: "肌酸補能量、β-丙氨酸防酸中毒、咖啡因點火；但練後千萬別亂吃維他命 C/E。",
+        metaphor_title: "🍖 生火烤肉時，千萬別拿滅火器澆冷水",
+        metaphor_desc: "肌酸像高純度木炭，幫你備足前 5 秒的爆發火力；β-丙氨酸像肌肉洗碗精，幫你把堆積的酸性油垢洗掉，避免腳軟；咖啡因像大鬧鐘，叫醒大腦裡偷懶的運動神經。最大地雷：訓練剛結束，肌肉正在「點火升溫」啟動修復機制（活性氧 ROS）。很多人這時立刻吞下大劑量維他命 C、E，這等於剛升起炭火，你就拿滅火器朝烤爐狂噴水，直接把辛苦訓練換來的進步火種澆熄！",
+        extra_knowledge_title: "甜菜根汁（天然硝酸鹽 NO3-）的隱藏外掛",
+        extra_knowledge_body: "除了肌酸與咖啡因，頂級選手常在賽前 2.5 小時喝 70–140ml 濃縮甜菜根汁。天然硝酸鹽能大幅提高肌肉一氧化氮（NO），專門改善快肌纖維的微血管灌流，並提高粒線體 ATP 生成效率，降低起跳推蹬時的耗氧成本！",
+        academic: {
+          paper: "Alkasasbeh, Amawi & Grivas (2026), Muscles (doi: 10.3390/muscles5030053)",
+          points: [
+            "肌酸 (Creatine)：每日 5g 飽和，加速高強度跳躍後磷酸肌酸 (PCr) 再合成。",
+            "β-丙氨酸 (Beta-Alanine)：每日 3.2–6.4g 補充 4–6 週，提高快肌肌肽 40–80%，中和 H+ 延緩疲勞。",
+            "咖啡因 (Caffeine)：賽前 60 分鐘 3–6 mg/kg，拮抗大腦 A2A 腺苷受體，維持皮質運動單元放電。",
+            "氧化還原悖論：運動誘發之活性氧 (ROS) 是啟動 PGC-1α 粒線體新生所必須之細胞訊息。重訓後 4 小時內若大劑量補充抗氧化劑，將抑制粒線體新生與肌肥大適應！"
+          ]
+        }
+      },
+      {
+        id: 8,
+        tag: "總結與落地執行",
+        title: "實戰總結：傳統迷思 vs 科學真相一覽表",
+        punchline: "用工程系統思維打造排球跳躍者：精準定位肌肉、尊重 SSC 時域、貫通動力鏈。",
+        metaphor_title: "📋 生活比喻全回顧：帶走這 5 個畫面",
+        metaphor_desc: "1. 練大腿前側中央 ➔ 像在向下手扶梯原地踏步（無效功）；改練外側踏階。<br>2. 練小腿彈射 ➔ 要拉長彈弓上的大橡皮筋，做 4 秒離心拉伸。<br>3. 落地起跳 ➔ 不要當硬水泥地，要像壓彈簧床一樣深屈蓄力。<br>4. 練核心腹肌 ➔ 核心是不鏽鋼吸管，防漏氣防受傷，但動力來自臀腿。<br>5. 練後恢復 ➔ 剛升好烤肉炭火，別拿滅火器（維他命C/E）噴冷水。",
+        extra_knowledge_title: "肌力重訓與跳躍訓練的「4 小時隔離原則」",
+        extra_knowledge_body: "大重量深蹲會啟動肌肉內的 mTOR 途徑，並帶來暫時性運動神經疲勞。若想在同一天進行高質量的增強式彈跳或扣球練習，兩者之間務必間隔 4 到 6 小時以上，或安排在不同天，才能確保起跳離地速度（Takeoff Velocity）不被肌力疲勞所干擾！",
+        academic: {
+          paper: "綜合自專案 Wiki 知識庫 (volleyball-vertical-jump-mastery.md)",
+          points: [
+            "週一課表：股外側肌肥大（高踏階 80% 1RM） + 40cm 長-SSC 深跳（著重推蹬衝量）",
+            "週三課表：短-SSC 快速攔網彈跳（GCT < 188ms） + 4 秒小腿直膝離心下墜",
+            "週五課表：8 週增強式漸進耐力循環 + 前蹲舉（82.5% 1RM） + 核心抗旋轉",
+            "營養整合：每日肌酸 5g + β-丙氨酸 4g + 賽前咖啡因 4mg/kg"
+          ]
+        }
+      }
+    ];
+
+    let currentSlideIndex = 0;
+    let professorDrawerVisible = false;
+
+    function renderSlide(index) {
+      currentSlideIndex = index;
+      const data = SLIDES_CONTENT[index];
+
+      // Update Tag and Counter
+      document.getElementById('slide-tag').innerText = data.tag;
+      document.getElementById('slide-counter').innerText = `0${data.id} / 08`;
+
+      // Render 2-Column Balanced Widescreen Layout
+      const body = document.getElementById('slide-body');
+      body.innerHTML = `
+        <div class="h-full flex flex-col justify-between">
+          
+          <!-- Top Title & Punchline -->
+          <div class="mb-3">
+            <h2 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-tight mb-2">
+              ${data.title}
+            </h2>
+            <div class="p-2.5 bg-teal-50 border-l-4 border-teal-600 rounded-r-lg text-xs md:text-sm font-bold text-teal-900">
+              ${data.punchline}
+            </div>
+          </div>
+
+          <!-- Main Content: Balanced 2-Column Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch mb-3">
+            
+            <!-- Left Card (7 cols): Everyday Metaphor -->
+            <div class="md:col-span-7 p-4 rounded-xl bg-amber-50/90 border border-amber-200 text-amber-950 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="text-xs font-black text-amber-800 uppercase tracking-wider mb-1.5 flex items-center space-x-1">
+                  <span>💡</span>
+                  <span>${data.metaphor_title}</span>
+                </div>
+                <p class="text-xs md:text-sm text-amber-950 leading-relaxed font-medium">
+                  ${data.metaphor_desc}
+                </p>
+              </div>
+            </div>
+
+            <!-- Right Card (5 cols): Supplementary Knowledge (Replaced Script) -->
+            <div class="md:col-span-5 p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="text-xs font-black text-indigo-700 uppercase tracking-wider mb-1.5 flex items-center space-x-1">
+                  <span>📌</span>
+                  <span>${data.extra_knowledge_title}</span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                  ${data.extra_knowledge_body}
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Professor Drawer Content -->
+          <div id="professor-drawer" class="drawer ${professorDrawerVisible ? 'open' : ''}">
+            <div class="p-3.5 rounded-xl bg-slate-950 text-slate-200 border border-slate-800 text-xs font-mono space-y-1.5">
+              <div class="text-sky-300 font-bold">🎓 ${data.academic.paper}</div>
+              <ul class="list-disc list-inside space-y-0.5 text-slate-300 text-[11px]">
+                ${data.academic.points.map(p => `<li>${p}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      `;
+    }
+
+    function nextSlide() {
+      if (currentSlideIndex < SLIDES_CONTENT.length - 1) {
+        currentSlideIndex++;
+      } else {
+        currentSlideIndex = 0; // Loop back
+      }
+      renderSlide(currentSlideIndex);
+    }
+
+    function prevSlide() {
+      if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        renderSlide(currentSlideIndex);
+      }
+    }
+
+    function toggleProfessorDrawer() {
+      professorDrawerVisible = !professorDrawerVisible;
+      const drawer = document.getElementById('professor-drawer');
+      const icon = document.getElementById('drawer-btn-icon');
+      if (drawer) {
+        if (professorDrawerVisible) {
+          drawer.classList.add('open');
+          if (icon) icon.innerText = '▲';
+        } else {
+          drawer.classList.remove('open');
+          if (icon) icon.innerText = '▼';
+        }
+      }
+    }
+
+    // Keyboard Navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        toggleProfessorDrawer();
+      } else {
+        const num = parseInt(e.key);
+        if (num >= 1 && num <= 8) {
+          renderSlide(num - 1);
+        }
+      }
+    });
+
+    // Initial render
+    renderSlide(0);
+  </script>
+</body>
+</html>
